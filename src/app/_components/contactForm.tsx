@@ -1,39 +1,43 @@
-// components/ContactForm.tsx
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-
-    // Required for Netlify to process the form
     formData.append("form-name", "contact");
 
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
     try {
-      await fetch("/", {
+      const response = await fetch("/", {
         method: "POST",
         body: formData,
       });
+
+      if (!response.ok) throw new Error("Network response was not ok");
 
       setSubmitted(true);
       form.reset();
     } catch (error) {
       console.error("Form submission error:", error);
+      alert("Form submission failed.");
     } finally {
       setLoading(false);
     }
   };
 
   if (submitted) {
-    return <p className="text-green-500">Thank you for your message!</p>;
+    return <p className="text-green-600">Thanks for reaching out!</p>;
   }
 
   return (
@@ -44,7 +48,6 @@ export default function ContactForm() {
       onSubmit={handleSubmit}
       className="space-y-4"
     >
-      {/* This hidden input is required for Netlify */}
       <input type="hidden" name="form-name" value="contact" />
 
       <div>
