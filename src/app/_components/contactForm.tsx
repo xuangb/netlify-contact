@@ -82,13 +82,21 @@ const ContactForm: FC = () => {
     setSubmitStatus("idle");
 
     try {
-      const response = await fetch("/", {
+      // Create FormData object from the form
+      const form = e.target as HTMLFormElement;
+      const formDataObj = new FormData(form);
+
+      // Convert FormData to URLSearchParams
+      const formEntries: Record<string, string> = {};
+      formDataObj.forEach((value, key) => {
+        formEntries[key] = value.toString();
+      });
+
+      // Submit to the static HTML file
+      const response = await fetch("/__forms.html", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          "form-name": "contact",
-          ...formData,
-        }).toString(),
+        body: new URLSearchParams(formEntries).toString(),
       });
 
       if (response.ok) {
@@ -112,15 +120,7 @@ const ContactForm: FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      {/* Hidden form for Netlify detection */}
-      <form name="contact" data-netlify="true" hidden>
-        <input type="text" name="name" />
-        <input type="email" name="email" />
-        <input type="text" name="subject" />
-        <textarea name="message"></textarea>
-      </form>
-
-      {/* Actual form */}
+      {/* Main form - no hidden form needed anymore */}
       <form
         name="contact"
         method="POST"
